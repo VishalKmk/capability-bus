@@ -18,9 +18,10 @@
 - [x] Service A: reply consumer (`ReplyConsumer`) logs incoming replies by `cid`
 - [x] End-to-end round trip confirmed working (publish → dispatch → reply → received)
 - [x] Local Kafka running (ZooKeeper-based) for dev/testing
+- [x] Refactor `CommandDispatcher`: move `needReply` branch out of individual handlers into the dispatcher itself (handlers just return a value or null)
+
 
 ### Remaining
-- [ ] Refactor `CommandDispatcher`: move `needReply` branch out of individual handlers into the dispatcher itself (handlers just return a value or null)
 - [ ] Add a second capability to prove the registry pattern generalizes past one entry
 - [ ] Handle unknown/unregistered capability cleanly (currently just logs and drops)
 - [ ] Decide + implement error handling for handler exceptions (currently unhandled)
