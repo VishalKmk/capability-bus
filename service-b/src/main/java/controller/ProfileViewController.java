@@ -12,18 +12,17 @@ import java.util.UUID;
 
 @RunOnVirtualThread
 @Path("api")
-public class Demo {
+public class ProfileViewController {
 
     @Channel("commands-out")
     Emitter<BusMessage> emitter;
 
-    @Path("hello")
+    @Path("view")
     @GET
-    public String hello() throws InterruptedException {
+    public String recordView() {
         String cid = UUID.randomUUID().toString();
-        emitter.send(new BusMessage(cid, "v1:ADD_LIKE", true,
-                Map.of("userId", "u1", "recipientId", "u2")));
-
+        emitter.send(new BusMessage(cid, "v1:CACHE_PROFILE_VIEW", false,
+                Map.of("profileId", UUID.randomUUID().toString())));
         return "Published, cid=" + cid;
     }
 }

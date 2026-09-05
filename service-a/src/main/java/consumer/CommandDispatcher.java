@@ -1,12 +1,9 @@
 package consumer;
 
-import io.quarkus.redis.datasource.RedisDataSource;
-import io.quarkus.redis.datasource.value.ValueCommands;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import model.BusMessage;
-import model.Like;
+import model.Comment;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
 import org.eclipse.microprofile.reactive.messaging.Incoming;
@@ -22,14 +19,8 @@ public class CommandDispatcher {
     @Channel("replies-out")
     Emitter<BusMessage> replyEmitter;
 
-    @Inject
-    RedisDataSource redisDataSource;
-
-    private ValueCommands<String, Long> counterCommands;
-
     private final Map<String, Function<BusMessage, Object>> registry = Map.of(
-            "v1:ADD_LIKE", this::handleAddLike,
-            "v1:CACHE_PROFILE_VIEW", this::handleCacheProfileView
+            "v1:ADD_COMMENT", this::handleAddComment
     );
 
     @Incoming("commands-in")
@@ -51,30 +42,17 @@ public class CommandDispatcher {
     }
 
     @Transactional
-    Object handleAddLike(BusMessage message) {
+    Object handleAddComment(BusMessage message) {
         @SuppressWarnings("unchecked")
         Map<String, String> data = (Map<String, String>) message.payload();
 
-        Like like = new Like();
-        like.userId = UUID.fromString(data.get("userId"));
-        like.recipientId = UUID.fromString(data.get("recipientId"));
-        like.createdAt = Instant.now();
-        like.persist();
+        Comment comment = new Comment();
+        comment.userId = UUID.fromString(data.get("userId"));
+        comment.recipientId = UUID.fromString(data.get("recipientId"));
+        comment.createdAt = Instant.now();
+        comment.persist();
 
-        return Map.of("status", "success", "likeId", like.id);
-    }
-
-    Object handleCacheProfileView(BusMessage message) {
-        if (counterCommands == null) {
-            counterCommands = redisDataSource.value(Long.class);
-        }
-
-        @SuppressWarnings("unchecked")
-        Map<String, String> data = (Map<String, String>) message.payload();
-        String key = "profile-views:" + data.get("profileId");
-
-        long newCount = counterCommands.incr(key);
-        System.out.println("Incremented " + key + " to " + newCount);
-        return null; // fire-and-forget, no reply body needed
+        System.out.println("Persisted comment id=" + comment.id);
+        return Map.of("status", "success", "commentId", comment.id);
     }
 }

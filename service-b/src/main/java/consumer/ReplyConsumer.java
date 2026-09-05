@@ -8,7 +8,7 @@ import org.eclipse.microprofile.reactive.messaging.Incoming;
 public class ReplyConsumer {
 
     @Incoming("replies-in")
-    public void handleReply(BusMessage reply) {
-        System.out.println("Alpha received reply for cid=" + reply.cid() + ": " + reply.payload());
+    public void handle(BusMessage reply) {
+        System.out.println("Beta received reply for cid=" + reply.cid() + ": " + reply.payload());
     }
 }
